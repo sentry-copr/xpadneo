@@ -1,68 +1,75 @@
-%global	  debug_package %{nil}
+%if 0%{?fedora}
+%global buildforkernels akmod
+%global debug_package %{nil}
+%endif
 
 Name:     xpadneo
 Version:  0.9.1
-Release:  1%{?dist}
+Release:  2%{?dist}
 Summary:  Advanced Linux Driver for Xbox One Wireless Gamepad
 Group:    System Environment/Kernel
 License:  GPLv3
 URL:      https://github.com/atar-axis/xpadneo
-Source0:  %{url}/archive/v%{version}.tar.gz
+Source0:  %{url}/archive/v%{version}/%{name}-%{version}.tar.gz
 
 %global   srcname hid-%{name}
 
-BuildArch: noarch
-
 BuildRequires:  make
 BuildRequires:  help2man
+BuildRequires:  gcc
+BuildRequires:  kmodtool
 
 Requires:       bash
 Requires:       bluez bluez-tools
 Requires:       %{name}-kmod = %{version}
 
+# kmodtool does its magic here
+%{expand:%(kmodtool --target %{_target_cpu}--kmodname %{name} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null) }
+
 %description
 Advanced Linux Driver for Xbox One Wireless Controller
 
-%package dkms
-Summary:  Kernel module to create Video4Linux loopback devices (DKMS)
-Requires: dkms >= 2.2
+%package kmod
+Summary:  Kernel module (kmod) for %{name}
 Requires: kernel-devel
-Provides: %{name}-kmod = %{version}
 
-%description dkms
-This package contains the module source and DKMS configuration to build the
-xpadneo kernel module.
-
-%post dkms
-%{_prefix}/lib/dkms/common.postinst %{srcname} %{version}
-
-%preun dkms
-if [ $1 -ne 1 ]; then
-    dkms remove -m %{srcname} -v %{version} --all --rpm_safe_upgrade || :
-fi
+%description kmod
+This is the first driver for the Xbox One Wireless Gamepad (which is shipped with the Xbox One S).
 
 %prep
+# error out if there was something wrong with kmodtool
+%{?kmodtool_check}
+
+# print kmodtool output for debugging purposes:
+kmodtool  --target %{_target_cpu} --kmodname %{name} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null
+
 %setup -q
 
-cd hid-%{name}
-mv dkms.conf.in dkms.conf
-sed -i 's/"@DO_NOT_CHANGE@"/"'"%{version}"'"/g' dkms.conf
+for kernel_version  in %{?kernel_versions} ; do
+  cp -a . _kmod_build_${kernel_version%%___*}
+done
+
+%build
+for kernel_version  in %{?kernel_versions} ; do
+  make V=1 %{?_smp_mflags} -C ${kernel_version##*___} M=${PWD}/_kmod_build_${kernel_version%%___*} modules
+done
 
 %install
-%{__rm} -rf $RPM_BUILD_ROOT
-mkdir -p %{buildroot}%{_usrsrc}
-mkdir -p %{buildroot}%{_bindir}
-
-cp -r hid-xpadneo %{buildroot}%{_usrsrc}/%{srcname}-%{version}
+for kernel_version in %{?kernel_versions}; do
+ mkdir -p %{buildroot}%{kmodinstdir_prefix}/${kernel_version%%___*}/%{kmodinstdir_postfix}/
+ install -D -m 755 _kmod_build_${kernel_version%%___*}/v4l2loopback.ko %{buildroot}%{kmodinstdir_prefix}/${kernel_version%%___*}/%{kmodinstdir_postfix}/
+ chmod a+x %{buildroot}%{kmodinstdir_prefix}/${kernel_version%%___*}/%{kmodinstdir_postfix}/*.ko
+done
+%{?akmod_install}
 
 %files
 %doc NEWS.md docs/README.md docs/CONFIGURATION.md
 %license LICENSE
 
-%files dkms
-%{_usrsrc}/hid-%{name}-%{version}
-
 %changelog
+* Thu Jun 17 2021 Jan Drögehoff <sentrycraft123@gmail.com> - 0.9.1-2
+- Move from DKMS to Akmods
+
 * Fri May 21 2021 Jan Drögehoff <sentrycraft123@gmail.com> - 0.9.1-1
 - Update to 0.9.1
 
