@@ -24,7 +24,7 @@ Requires:       bluez bluez-tools
 Requires:       %{name}-kmod = %{version}
 
 # kmodtool does its magic here
-%{expand:%(kmodtool --target %{_target_cpu}--kmodname %{name} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null) }
+%{expand:%(kmodtool --target %{_target_cpu} --kmodname %{name} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null) }
 
 %description
 Advanced Linux Driver for Xbox One Wireless Controller
