@@ -4,8 +4,8 @@
 %endif
 
 Name:     xpadneo
-Version:  0.9.1
-Release:  2%{?dist}
+Version:  0.9.2
+Release:  1%{?dist}
 Summary:  Advanced Linux Driver for Xbox One Wireless Gamepad
 Group:    System Environment/Kernel
 License:  GPLv3
@@ -78,6 +78,9 @@ install -D -m 0644 hid-xpadneo/etc-udev-rules.d/60-xpadneo.rules %{buildroot}%{_
 %{_udevrulesdir}/60-xpadneo.rules
 
 %changelog
+* Sun May 29 2022 Jan Drögehoff <sentrycraft123@gmail.com> - 0.9.2-1
+- Update to 0.9.2
+
 * Thu Jun 17 2021 Jan Drögehoff <sentrycraft123@gmail.com> - 0.9.1-2
 - Move from DKMS to Akmods
 
