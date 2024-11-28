@@ -8,11 +8,11 @@
 Name:           %{prjname}-kmod
 Summary:        Kernel module (kmod) for %{prjname}
 Version:        0.9.6
-Release:        2%{?dist}
+Release:        3%{?dist}
 License:        GPLv2+
 
 URL:            https://github.com/atar-axis/xpadneo
-Source0:        %{url}/archive/v%{version}/%{name}-%{version}.tar.gz
+Source0:        %{url}/archive/v%{version}/%{prjname}-%{version}.tar.gz
 
 BuildRequires:  make
 BuildRequires:  gcc
@@ -36,7 +36,7 @@ This package contains the kmod module for %{prjname}.
 # print kmodtool output for debugging purposes:
 kmodtool  --target %{_target_cpu} --kmodname %{prjname} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null
 
-%setup -q -c %{prjname}-%{version}
+%autosetup -n %{prjname}-%{version}
 
 for kernel_version  in %{?kernel_versions} ; do
     cp -a hid-xpadneo/src _kmod_build_${kernel_version%%___*}
@@ -58,6 +58,9 @@ done
 
 
 %changelog
+* Thu Nov 28 2024 Jan200101 <sentrycraft123@gmail.com> - 0.9.6-3
+- fix pathing issue
+
 * Thu Nov 28 2024 Jan200101 <sentrycraft123@gmail.com> - 0.9.6-2
 - split kernel module into separate package
 
