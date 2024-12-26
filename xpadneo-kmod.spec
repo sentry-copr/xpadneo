@@ -7,8 +7,8 @@
 
 Name:           %{prjname}-kmod
 Summary:        Kernel module (kmod) for %{prjname}
-Version:        0.9.6
-Release:        3%{?dist}
+Version:        0.9.7
+Release:        1%{?dist}
 License:        GPLv2+
 
 URL:            https://github.com/atar-axis/xpadneo
@@ -58,6 +58,9 @@ done
 
 
 %changelog
+* Thu Dec 26 2024 Jan200101 <sentrycraft123@gmail.com> - 0.9.7-1
+- Update to 0.9.7
+
 * Thu Nov 28 2024 Jan200101 <sentrycraft123@gmail.com> - 0.9.6-3
 - fix pathing issue
 
